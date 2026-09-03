@@ -10,6 +10,7 @@ import type { KalimbaNote } from './types/kalimba';
 export default function App() {
   const [volume, setVolume] = useState(80);
   const [haptics, setHaptics] = useState(false);
+  const [fallbackFullscreen, setFallbackFullscreen] = useState(false);
   const [activePointers, setActivePointers] = useState<Map<string, Set<number>>>(new Map());
   const [keyboardNotes, setKeyboardNotes] = useState(new Set<string>());
   const { playNote, setVolume: setAudioVolume, loadingState } = useKalimbaAudio();
@@ -34,8 +35,8 @@ export default function App() {
   useKeyboardControls({ onPlay: handlePlay, onActiveChange: handleKeyboardActiveChange });
   const activeNotes = new Set([...activePointers.keys(), ...keyboardNotes]);
   const handleVolumeChange = (value: number) => { setVolume(value); setAudioVolume(value); };
-  return <main className="app-shell">
-    <Controls volume={volume} haptics={haptics} loading={loadingState === 'loading'} onVolumeChange={handleVolumeChange} onHapticsChange={setHaptics} />
+  return <main className={`app-shell ${fallbackFullscreen ? 'is-expanded' : ''}`}>
+    <Controls volume={volume} haptics={haptics} fallbackFullscreen={fallbackFullscreen} loading={loadingState === 'loading'} onVolumeChange={handleVolumeChange} onHapticsChange={setHaptics} onFallbackFullscreenChange={setFallbackFullscreen} />
     <Kalimba activeNotes={activeNotes} haptics={haptics} onPlay={handlePlay} onPointerActiveChange={handlePointerActiveChange} />
     <p className="hint">화면을 터치하거나 <kbd>H</kbd> 중심의 키보드 배치로 연주하세요.</p>
     <PortraitNotice visible={isNarrowPortrait} />

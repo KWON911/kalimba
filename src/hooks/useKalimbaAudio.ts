@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { calculateSfZPlaybackRate, noteToMidi, VCSL_TANZANIA_FILES, VCSL_TANZANIA_REGIONS } from '../data/vcslTanzania';
+import { calculateOffsetSeconds, calculateSfZPlaybackRate, noteToMidi, selectRoundRobinRegion, VCSL_TANZANIA_FILES, VCSL_TANZANIA_REGIONS } from '../data/vcslTanzania';
 import type { KalimbaNote, VcslSampleRegion } from '../types/kalimba';
 
 type LoadingState = 'idle' | 'loading' | 'ready';
@@ -25,8 +25,15 @@ export function useKalimbaAudio() {
     const context = getAudioContext();
     if (!context) return null;
     const masterGain = context.createGain();
+    const compressor = context.createDynamicsCompressor();
     masterGain.gain.value = volumeRef.current / 100;
-    masterGain.connect(context.destination);
+    compressor.threshold.value = -1;
+    compressor.knee.value = 0;
+    compressor.ratio.value = 20;
+    compressor.attack.value = 0.003;
+    compressor.release.value = 0.12;
+    masterGain.connect(compressor);
+    compressor.connect(context.destination);
     contextRef.current = context;
     masterGainRef.current = masterGain;
     return context;
@@ -67,7 +74,7 @@ export function useKalimbaAudio() {
     if (!regions?.length) return undefined;
     const counter = roundRobinCountersRef.current.get(note.note) ?? 0;
     roundRobinCountersRef.current.set(note.note, counter + 1);
-    return regions[counter % regions.length];
+    return selectRoundRobinRegion(regions, counter);
   };
 
   const playFallback = (context: AudioContext, masterGain: GainNode, note: KalimbaNote) => {
@@ -81,6 +88,11 @@ export function useKalimbaAudio() {
     envelope.gain.exponentialRampToValueAtTime(0.0001, now + 1.25);
     oscillator.connect(envelope);
     envelope.connect(masterGain);
+    oscillator.onended = () => {
+      oscillator.disconnect();
+      envelope.disconnect();
+      oscillator.onended = null;
+    };
     oscillator.start(now);
     oscillator.stop(now + 1.3);
   };
@@ -103,7 +115,12 @@ export function useKalimbaAudio() {
     sampleGain.gain.value = 10 ** (region.volume / 20);
     source.connect(sampleGain);
     sampleGain.connect(masterGain);
-    source.start(context.currentTime, region.offset / buffer.sampleRate);
+    source.onended = () => {
+      source.disconnect();
+      sampleGain.disconnect();
+      source.onended = null;
+    };
+    source.start(context.currentTime, calculateOffsetSeconds(region, buffer.sampleRate));
   }, [getOrCreateContext]);
 
   return { playNote, setVolume, loadingState };

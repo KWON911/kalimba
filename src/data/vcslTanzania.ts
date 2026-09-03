@@ -40,5 +40,14 @@ export const noteToMidi = (note: string) => {
   return (Number(octaveText) + 1) * 12 + semitones[letter] + (accidental === '#' ? 1 : accidental === 'b' ? -1 : 0);
 };
 
+export const calculateSfZCents = (targetMidi: number, region: VcslSampleRegion) =>
+  (targetMidi - region.pitchKeycenter) * 100 + region.tune;
+
 export const calculateSfZPlaybackRate = (targetMidi: number, region: VcslSampleRegion) =>
-  2 ** ((targetMidi - region.pitchKeycenter + region.tune / 100) / 12);
+  2 ** (calculateSfZCents(targetMidi, region) / 1200);
+
+export const calculateOffsetSeconds = (region: VcslSampleRegion, sampleRate: number) =>
+  region.offset / sampleRate;
+
+export const selectRoundRobinRegion = (regions: VcslSampleRegion[], playCount: number) =>
+  regions[playCount % regions.length];

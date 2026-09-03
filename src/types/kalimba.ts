@@ -9,3 +9,15 @@ export interface KalimbaNote {
   order: number;
   lengthRatio: number;
 }
+
+export interface VcslSampleRegion {
+  sourceFile: string;
+  pitchKeycenter: number;
+  lokey: number;
+  hikey: number;
+  offset: number;
+  tune: number;
+  volume: number;
+  seqLength?: number;
+  seqPosition?: number;
+}

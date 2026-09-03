@@ -1,18 +1,17 @@
 import { useCallback, useRef } from 'react';
 import type { PointerEvent } from 'react';
 import { KALIMBA_NOTES } from '../data/notes';
-import type { KalimbaNote, LabelMode } from '../types/kalimba';
+import type { KalimbaNote } from '../types/kalimba';
 import { KalimbaKey } from './KalimbaKey';
 
 interface KalimbaProps {
   activeNotes: Set<string>;
-  labelMode: LabelMode;
   haptics: boolean;
   onPlay: (note: KalimbaNote) => void;
   onPointerActiveChange: (noteName: string, pointerId: number, active: boolean) => void;
 }
 
-export function Kalimba({ activeNotes, labelMode, haptics, onPlay, onPointerActiveChange }: KalimbaProps) {
+export function Kalimba({ activeNotes, haptics, onPlay, onPointerActiveChange }: KalimbaProps) {
   const pointerNotes = useRef(new Map<number, string>());
   const changePointerNote = useCallback((pointerId: number, nextNote: KalimbaNote | undefined) => {
     const previous = pointerNotes.current.get(pointerId);
@@ -31,7 +30,7 @@ export function Kalimba({ activeNotes, labelMode, haptics, onPlay, onPointerActi
     event.preventDefault();
     event.currentTarget.setPointerCapture(event.pointerId);
     changePointerNote(event.pointerId, note);
-    if (haptics && 'vibrate' in navigator) navigator.vibrate(8);
+    if (haptics && event.pointerType === 'touch' && typeof navigator.vibrate === 'function') navigator.vibrate(8);
   };
 
   const handleMove = (event: PointerEvent<HTMLDivElement>) => {
@@ -59,7 +58,6 @@ export function Kalimba({ activeNotes, labelMode, haptics, onPlay, onPointerActi
             <KalimbaKey
               key={note.note}
               note={note}
-              labelMode={labelMode}
               active={activeNotes.has(note.note)}
               onPointerDown={startPointer}
             />

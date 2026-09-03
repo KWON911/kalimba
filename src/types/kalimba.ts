@@ -1,9 +1,8 @@
-export type LabelMode = 'number' | 'note' | 'both' | 'none';
-
 export interface KalimbaNote {
   note: string;
   number: string;
-  keyboard: string;
+  keyboardCode: string;
+  keyboardLabel: string;
   frequency: number;
   file: string;
   order: number;

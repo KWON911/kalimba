@@ -5,11 +5,10 @@ import { PortraitNotice } from './components/PortraitNotice';
 import { useKalimbaAudio } from './hooks/useKalimbaAudio';
 import { useKeyboardControls } from './hooks/useKeyboardControls';
 import { useOrientation } from './hooks/useOrientation';
-import type { KalimbaNote, LabelMode } from './types/kalimba';
+import type { KalimbaNote } from './types/kalimba';
 
 export default function App() {
   const [volume, setVolume] = useState(80);
-  const [labelMode, setLabelMode] = useState<LabelMode>('both');
   const [haptics, setHaptics] = useState(false);
   const [activePointers, setActivePointers] = useState<Map<string, Set<number>>>(new Map());
   const [keyboardNotes, setKeyboardNotes] = useState(new Set<string>());
@@ -36,9 +35,9 @@ export default function App() {
   const activeNotes = new Set([...activePointers.keys(), ...keyboardNotes]);
   const handleVolumeChange = (value: number) => { setVolume(value); setAudioVolume(value); };
   return <main className="app-shell">
-    <Controls volume={volume} labelMode={labelMode} haptics={haptics} loading={loadingState === 'loading'} onVolumeChange={handleVolumeChange} onLabelModeChange={setLabelMode} onHapticsChange={setHaptics} />
-    <Kalimba activeNotes={activeNotes} labelMode={labelMode} haptics={haptics} onPlay={handlePlay} onPointerActiveChange={handlePointerActiveChange} />
-    <p className="hint">화면을 터치하거나 <kbd>Q</kbd>–<kbd>;</kbd> 키로 연주하세요.</p>
+    <Controls volume={volume} haptics={haptics} loading={loadingState === 'loading'} onVolumeChange={handleVolumeChange} onHapticsChange={setHaptics} />
+    <Kalimba activeNotes={activeNotes} haptics={haptics} onPlay={handlePlay} onPointerActiveChange={handlePointerActiveChange} />
+    <p className="hint">화면을 터치하거나 <kbd>H</kbd> 중심의 키보드 배치로 연주하세요.</p>
     <PortraitNotice visible={isNarrowPortrait} />
   </main>;
 }

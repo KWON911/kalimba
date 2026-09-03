@@ -10,9 +10,19 @@ describe('kalimba note data', () => {
     ]);
   });
 
-  it('maps the center C4 tine to S and gives it the longest ratio', () => {
+  it('maps the center C4 tine to the physical H key and gives it the longest ratio', () => {
     const center = KALIMBA_NOTES.find((note) => note.note === 'C4');
-    expect(center).toMatchObject({ keyboard: 'S', number: '1', lengthRatio: 1 });
-    expect(NOTES_BY_KEYBOARD.s.note).toBe('C4');
+    expect(center).toMatchObject({ keyboardCode: 'KeyH', keyboardLabel: 'H', number: '1', lengthRatio: 1 });
+    expect(NOTES_BY_KEYBOARD.KeyH.note).toBe('C4');
+  });
+
+  it('uses only the requested physical-key map', () => {
+    expect(Object.fromEntries(KALIMBA_NOTES.map((note) => [note.note, note.keyboardCode]))).toEqual({
+      C4: 'KeyH', D4: 'KeyG', E4: 'KeyJ', F4: 'KeyF', G4: 'KeyK', A4: 'KeyD', B4: 'KeyL',
+      C5: 'KeyS', D5: 'Semicolon', E5: 'KeyA', F5: 'KeyU', G5: 'KeyR', A5: 'KeyI', B5: 'KeyE',
+      C6: 'KeyO', D6: 'KeyW', E6: 'KeyP',
+    });
+    expect(NOTES_BY_KEYBOARD.KeyQ).toBeUndefined();
+    expect(NOTES_BY_KEYBOARD.KeyT).toBeUndefined();
   });
 });

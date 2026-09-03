@@ -15,17 +15,17 @@ export function useKeyboardControls({ onPlay, onActiveChange }: KeyboardOptions)
   useEffect(() => {
     const handleDown = (event: KeyboardEvent) => {
       if (event.repeat || isTypingTarget(event.target)) return;
-      const key = event.key.toLowerCase();
-      const note = NOTES_BY_KEYBOARD[key];
-      if (!note || heldKeys.current.has(key)) return;
-      heldKeys.current.add(key);
+      const code = event.code;
+      const note = NOTES_BY_KEYBOARD[code];
+      if (!note || heldKeys.current.has(code)) return;
+      heldKeys.current.add(code);
       void onPlay(note);
       onActiveChange(note.note, true);
     };
     const handleUp = (event: KeyboardEvent) => {
-      const key = event.key.toLowerCase();
-      const note = NOTES_BY_KEYBOARD[key];
-      if (!note || !heldKeys.current.delete(key)) return;
+      const code = event.code;
+      const note = NOTES_BY_KEYBOARD[code];
+      if (!note || !heldKeys.current.delete(code)) return;
       onActiveChange(note.note, false);
     };
     window.addEventListener('keydown', handleDown);
